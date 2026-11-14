@@ -38,6 +38,7 @@
 - **Customer Transaction History:** Chronological list of stamps earned and rewards redeemed across all cards.
 - **Merchant Dashboard:** Summary KPIs showing Total Stamps Issued, Total Rewards Redeemed, and Total Active Customers.
 
+```mermaid
 flowchart LR
     %% Actors
     Customer(["👤 Customer"])
