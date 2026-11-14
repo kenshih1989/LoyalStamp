@@ -37,3 +37,56 @@
 ## 5. History & Analytics (Slice: `Features/HistoryAndDashboard`)
 - **Customer Transaction History:** Chronological list of stamps earned and rewards redeemed across all cards.
 - **Merchant Dashboard:** Summary KPIs showing Total Stamps Issued, Total Rewards Redeemed, and Total Active Customers.
+
+flowchart LR
+    %% Actors
+    Customer(["👤 Customer"])
+    Merchant(["🏪 Merchant"])
+
+    %% System Boundary
+    subgraph LoyalStamp ["LoyalStamp System (Blazor Web App)"]
+        direction TB
+        
+        %% Auth Slice
+        UC1("Register / Login")
+        UC2("Setup Store Profile")
+
+        %% Campaign Slice
+        UC3("Create / Edit Stamp Campaign")
+        UC4("Toggle Campaign Active Status")
+
+        %% Customer Wallet Slice
+        UC5("Browse & Join Campaigns")
+        UC6("View My Stamp Cards")
+        UC7("Display Checkout QR / Card Code")
+
+        %% Stamp Operations Slice
+        UC8("Scan Code & Issue Stamps")
+        UC9("Verify & Redeem Reward")
+        UC10(["⚡ Real-Time UI Sync (SignalR)"])
+
+        %% Reporting Slice
+        UC11("View Stamp & Redemption History")
+        UC12("View Merchant KPI Dashboard")
+    end
+
+    %% Customer Relationships
+    Customer --> UC1
+    Customer --> UC5
+    Customer --> UC6
+    Customer --> UC7
+    Customer --> UC11
+
+    %% Merchant Relationships
+    Merchant --> UC1
+    Merchant --> UC2
+    Merchant --> UC3
+    Merchant --> UC4
+    Merchant --> UC8
+    Merchant --> UC9
+    Merchant --> UC12
+
+    %% System Triggers (Include / Notify)
+    UC8 -.->|triggers| UC10
+    UC9 -.->|triggers| UC10
+    UC10 -.->|updates live| UC6
