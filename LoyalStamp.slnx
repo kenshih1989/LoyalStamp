@@ -1,8 +1,8 @@
 <Solution>
   <Folder Name="/docs/">
-    <File Path="01_Functional_Requirements.md" />
-    <File Path="02_Architecture_And_Schema.md" />
-    <File Path="03_YouTube_Video_Plan.md" />
+    <File Path="docs/01_Functional_Requirements.md" />
+    <File Path="docs/02_Architecture_And_Schema.md" />
+    <File Path="docs/03_YouTube_Video_Plan.md" />
   </Folder>
   <Project Path="LoyalStamp/LoyalStamp.csproj" />
 </Solution>
