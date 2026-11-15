@@ -1,0 +1,157 @@
+﻿@page "/login"
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
+@using LoyalStamp.Data.Entities
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+@inject NavigationManager Navigation
+
+<PageTitle>Log In - LoyalStamp</PageTitle>
+
+<div class="container mt-5" style="max-width: 440px;">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h3 class="card-title text-center mb-1">Welcome Back</h3>
+            <p class="text-muted text-center small mb-4">
+                Sign in to access your stamp cards or merchant dashboard.
+            </p>
+
+            @if (Registered)
+            {
+                <div class="alert alert-success small" role="alert">
+                    Account created successfully! Please log in with your email and password.
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="alert alert-danger small" role="alert">
+                    @_errorMessage
+                </div>
+            }
+
+            <EditForm Model="Input" method="post" OnValidSubmit="LoginUserAsync" FormName="LoginForm">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="form-label">Email Address</label>
+                    <InputText type="email" class="form-control" @bind-Value="Input!.Email" placeholder="name@example.com" />
+                    <ValidationMessage For="@(() => Input.Email)" class="text-danger small" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <InputText type="password" class="form-control" @bind-Value="Input!.Password" />
+                    <ValidationMessage For="@(() => Input.Password)" class="text-danger small" />
+                </div>
+
+                <div class="mb-4 form-check">
+                    <InputCheckbox class="form-check-input" @bind-Value="Input!.RememberMe" id="rememberMeCheck" />
+                    <label class="form-check-label small" for="rememberMeCheck">
+                        Keep me signed in
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    Log In
+                </button>
+            </EditForm>
+
+            <hr class="my-4" />
+
+            <div class="text-center small">
+                <p class="mb-1">
+                    Don't have an account? <a href="/register-as-user">Register as Customer</a>
+                </p>
+                <p class="mb-0 text-muted">
+                    Business owner? <a href="/register-as-merchant">Register as Merchant</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private LoginInputModel? Input { get; set; }
+
+    [SupplyParameterFromQuery]
+    private bool Registered { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    private string? _errorMessage;
+
+    protected override void OnInitialized()
+    {
+        Input ??= new();
+    }
+
+    private async Task LoginUserAsync()
+    {
+        if (Input is null) return;
+
+        // 1. Look up the user by email first (also reuses this object for the role check below)
+        var user = await UserManager.FindByEmailAsync(Input.Email);
+        if (user is null)
+        {
+            _errorMessage = "Invalid email or password. Please try again.";
+            return;
+        }
+
+        // 2. Verify the password without issuing the cookie yet
+        var passwordResult = await SignInManager.CheckPasswordSignInAsync(
+            user: user,
+            password: Input.Password,
+            lockoutOnFailure: false);
+
+        if (passwordResult.Succeeded)
+        {
+            // 3. Issue the Authentication Cookie with the FullName claim attached
+            var customClaims = new List<Claim>
+        {
+            new("FullName", user.FullName)
+        };
+
+            await SignInManager.SignInWithClaimsAsync(
+                user: user,
+                isPersistent: Input.RememberMe,
+                additionalClaims: customClaims);
+
+            // If a return URL is specified, navigate back to the original page first
+            if (!string.IsNullOrWhiteSpace(ReturnUrl) && Uri.IsWellFormedUriString(ReturnUrl, UriKind.Relative))
+            {
+                Navigation.NavigateTo(ReturnUrl);
+                return;
+            }
+
+            // Automatically redirect based on user role
+            if (await UserManager.IsInRoleAsync(user, "Merchant"))
+            {
+                Navigation.NavigateTo("/merchant/dashboard");
+            }
+            else
+            {
+                Navigation.NavigateTo("/explore");
+            }
+        }
+        else
+        {
+            _errorMessage = "Invalid email or password. Please try again.";
+        }
+    }
+
+    private sealed class LoginInputModel
+    {
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email format.")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Password is required.")]
+        public string Password { get; set; } = string.Empty;
+
+        public bool RememberMe { get; set; }
+    }
+}

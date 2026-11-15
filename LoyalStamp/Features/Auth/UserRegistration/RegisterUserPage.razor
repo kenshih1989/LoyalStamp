@@ -1,0 +1,112 @@
+﻿@page "/register-as-user"
+@rendermode InteractiveServer
+@inject RegisterUserHandler RegisterHandler
+@inject NavigationManager Navigation
+
+<PageTitle>Customer Registration - LoyalStamp</PageTitle>
+
+<div class="container mt-5" style="max-width: 480px;">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h3 class="card-title text-center mb-1">Create Customer Account</h3>
+            <p class="text-muted text-center small mb-4">
+                Join LoyalStamp to collect digital stamps and earn rewards.
+            </p>
+
+            @if (_errors.Any())
+            {
+                <div class="alert alert-danger" role="alert">
+                    <ul class="mb-0 ps-3">
+                        @foreach (var error in _errors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <EditForm Model="_request" OnValidSubmit="HandleRegistrationAsync" FormName="RegisterUserForm">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="form-label">Full Name</label>
+                    <InputText class="form-control" @bind-Value="_request.FullName" placeholder="e.g., Alex Tan" />
+                    <ValidationMessage For="@(() => _request.FullName)" class="text-danger small" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email Address</label>
+                    <InputText type="email" class="form-control" @bind-Value="_request.Email" placeholder="name@example.com" />
+                    <ValidationMessage For="@(() => _request.Email)" class="text-danger small" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <InputText type="password" class="form-control" @bind-Value="_request.Password" />
+                    <ValidationMessage For="@(() => _request.Password)" class="text-danger small" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Confirm Password</label>
+                    <InputText type="password" class="form-control" @bind-Value="_request.ConfirmPassword" />
+                    <ValidationMessage For="@(() => _request.ConfirmPassword)" class="text-danger small" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100" disabled="@_isSubmitting">
+                    @if (_isSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span>Creating Account...</span>
+                    }
+                    else
+                    {
+                        <span>Register as Customer</span>
+                    }
+                </button>
+            </EditForm>
+
+            <hr class="my-4" />
+
+            <div class="text-center small">
+                <p class="mb-1">
+                    Already have an account? <a href="/login">Log in</a>
+                </p>
+                <p class="mb-0 text-muted">
+                    Want to launch loyalty cards for your business?
+                    <a href="/register-as-merchant" class="fw-semibold">Register as a Merchant</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private RegisterUserRequest _request = new();
+    private List<string> _errors = new();
+    private bool _isSubmitting = false;
+
+    private async Task HandleRegistrationAsync()
+    {
+        _isSubmitting = true;
+        _errors.Clear();
+
+        try
+        {
+            var (succeeded, errors) = await RegisterHandler.HandleAsync(_request);
+
+            if (succeeded)
+            {
+				// After successful registration, navigate to the login page (can be changed to auto-login to Explore page after Login component is completed)
+                Navigation.NavigateTo("/login?registered=true");
+            }
+            else
+            {
+                _errors = errors.ToList();
+            }
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}

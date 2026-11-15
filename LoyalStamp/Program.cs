@@ -1,6 +1,8 @@
 using LoyalStamp.Components;
 using LoyalStamp.Data;
 using LoyalStamp.Data.Entities;
+using LoyalStamp.Features.Auth.UserRegistration;
+using LoyalStamp.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,14 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-
-var app = builder.Build();
-
-// Seed roles in the database
-using (var scope = app.Services.CreateScope())
-{
-    await DbSeeder.SeedRolesAsync(scope.ServiceProvider);
-}
 
 // Register the DbContext with a factory and configure it to use SQL Server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -29,7 +23,7 @@ builder.Services.AddScoped(p =>
     p.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
 
 // Register ASP.NET Core Identity services with the custom ApplicationUser class and IdentityRole
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     options.User.RequireUniqueEmail = true;
     options.Password.RequiredLength = 6;
@@ -37,6 +31,20 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<UserIdGenerator>();
+builder.Services.AddScoped<RegisterUserHandler>();
+
+// Add authentication and authorization services
+builder.Services.AddCascadingAuthenticationState();
+
+var app = builder.Build();
+
+// Seed roles in the database
+using (var scope = app.Services.CreateScope())
+{
+    await DbSeeder.SeedRolesAsync(scope.ServiceProvider);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -48,7 +56,17 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseAntiforgery();
+
+// 退出登录端点（支持表单 POST 退出）
+app.MapPost("/logout", async (SignInManager<User> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Redirect("/");
+});
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

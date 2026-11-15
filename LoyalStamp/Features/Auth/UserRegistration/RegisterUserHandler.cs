@@ -1,4 +1,5 @@
 ﻿using LoyalStamp.Data.Entities;
+using LoyalStamp.Shared;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
@@ -24,21 +25,26 @@ namespace LoyalStamp.Features.Auth.UserRegistration
     }
     public class RegisterUserHandler
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<User> _userManager;
+        private readonly UserIdGenerator _idGenerator;
 
-        public RegisterUserHandler(UserManager<ApplicationUser> userManager)
+        public RegisterUserHandler(UserManager<User> userManager, UserIdGenerator idGenerator)
         {
             _userManager = userManager;
+            _idGenerator = idGenerator;
         }
 
         public async Task<(bool Succeeded, IEnumerable<string> Errors)> HandleAsync(RegisterUserRequest request)
         {
-            var user = new ApplicationUser
+            var customId = await _idGenerator.GenerateCustomerIdAsync();
+
+            var user = new User
             {
+                Id = customId,
                 UserName = request.Email,
                 Email = request.Email,
                 FullName = request.FullName,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.Now
             };
 
             var createResult = await _userManager.CreateAsync(user, request.Password);

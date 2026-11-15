@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace LoyalStamp.Data.Entities
 {
-    public class ApplicationUser : IdentityUser
+    public class User : IdentityUser
     {
         [Required]
         [MaxLength(100)]

@@ -103,3 +103,31 @@
         overflow-y: auto;
     }
 }
+
+/* 让 Bootstrap 字体图标与模板自带的 1.25rem SVG 图标大小、垂直位置一致 */
+.nav-item ::deep .bi {
+    font-size: 1.25rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    top: 0;
+}
+
+/* 让 Logout 按钮的文字颜色、高度与 Home 导航项一致 */
+.nav-item ::deep a,
+.nav-item ::deep button.nav-link {
+    color: #d7d7d7;
+    border-radius: 4px;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    line-height: 3rem;
+    text-decoration: none;
+}
+
+    .nav-item ::deep a:hover,
+    .nav-item ::deep button.nav-link:hover {
+        background-color: rgba(255,255,255,0.1);
+        color: white;
+    }
