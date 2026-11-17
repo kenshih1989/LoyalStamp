@@ -1,6 +1,7 @@
 using LoyalStamp.Components;
 using LoyalStamp.Data;
 using LoyalStamp.Data.Entities;
+using LoyalStamp.Features.Auth.MerchantsRegistration;
 using LoyalStamp.Features.Auth.UserRegistration;
 using LoyalStamp.Shared;
 using Microsoft.AspNetCore.Identity;
@@ -34,6 +35,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 
 builder.Services.AddScoped<UserIdGenerator>();
 builder.Services.AddScoped<RegisterUserHandler>();
+builder.Services.AddScoped<RegisterMerchantHandler>();
 
 // Add authentication and authorization services
 builder.Services.AddCascadingAuthenticationState();

@@ -1,0 +1,137 @@
+﻿@page "/register-as-merchant"
+@rendermode InteractiveServer
+@using LoyalStamp.Features.Auth.MerchantsRegistration
+@inject RegisterMerchantHandler RegisterHandler
+@inject NavigationManager Navigation
+
+<PageTitle>Merchant Registration - LoyalStamp</PageTitle>
+
+<div class="container my-5" style="max-width: 560px;">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h3 class="card-title text-center mb-1">Partner as a Merchant</h3>
+            <p class="text-muted text-center small mb-4">
+                Create your business account and set up your store profile to launch loyalty stamp cards.
+            </p>
+
+            @if (_errors.Any())
+            {
+                <div class="alert alert-danger" role="alert">
+                    <ul class="mb-0 ps-3">
+                        @foreach (var error in _errors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <EditForm Model="_request" OnValidSubmit="HandleRegistrationAsync" FormName="RegisterMerchantForm">
+                <DataAnnotationsValidator />
+
+                <h6 class="text-uppercase text-muted fw-bold small mb-3">1. Account Details</h6>
+
+                <div class="mb-3">
+                    <label class="form-label">Owner Full Name <span class="text-danger">*</span></label>
+                    <InputText class="form-control" @bind-Value="_request.FullName" placeholder="e.g., Sarah Lim" />
+                    <ValidationMessage For="@(() => _request.FullName)" class="text-danger small" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Business Email <span class="text-danger">*</span></label>
+                    <InputText type="email" class="form-control" @bind-Value="_request.Email" placeholder="owner@yourstore.com" />
+                    <ValidationMessage For="@(() => _request.Email)" class="text-danger small" />
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Password <span class="text-danger">*</span></label>
+                        <InputText type="password" class="form-control" @bind-Value="_request.Password" />
+                        <ValidationMessage For="@(() => _request.Password)" class="text-danger small" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                        <InputText type="password" class="form-control" @bind-Value="_request.ConfirmPassword" />
+                        <ValidationMessage For="@(() => _request.ConfirmPassword)" class="text-danger small" />
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <h6 class="text-uppercase text-muted fw-bold small mb-3">2. Store Profile</h6>
+
+                <div class="mb-3">
+                    <label class="form-label">Store Name <span class="text-danger">*</span></label>
+                    <InputText class="form-control" @bind-Value="_request.StoreName" placeholder="e.g., Artisan Brew Coffee" />
+                    <ValidationMessage For="@(() => _request.StoreName)" class="text-danger small" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Store Description <span class="text-muted small">(Optional)</span></label>
+                    <InputTextArea class="form-control" rows="3" @bind-Value="_request.Description" placeholder="Tell customers about your shop, specialty items, or location..." />
+                    <ValidationMessage For="@(() => _request.Description)" class="text-danger small" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Store Logo URL <span class="text-muted small">(Optional)</span></label>
+                    <InputText class="form-control" @bind-Value="_request.LogoUrl" placeholder="https://example.com/logo.png" />
+                    <ValidationMessage For="@(() => _request.LogoUrl)" class="text-danger small" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100" disabled="@_isSubmitting">
+                    @if (_isSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span>Creating Merchant Account...</span>
+                    }
+                    else
+                    {
+                        <span>Register Merchant & Store</span>
+                    }
+                </button>
+            </EditForm>
+
+            <hr class="my-4" />
+
+            <div class="text-center small">
+                <p class="mb-1">
+                    Already registered? <a href="/login">Log in</a>
+                </p>
+                <p class="mb-0 text-muted">
+                    Looking to collect stamps as a shopper?
+                    <a href="/register-as-user" class="fw-semibold">Register as a Customer</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private RegisterMerchantRequest _request = new();
+    private List<string> _errors = new();
+    private bool _isSubmitting = false;
+
+    private async Task HandleRegistrationAsync()
+    {
+        _isSubmitting = true;
+        _errors.Clear();
+
+        try
+        {
+            var (succeeded, errors) = await RegisterHandler.HandleAsync(_request);
+
+            if (succeeded)
+            {
+                Navigation.NavigateTo("/login?registered=true");
+            }
+            else
+            {
+                _errors = errors.ToList();
+            }
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}

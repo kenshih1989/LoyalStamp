@@ -13,6 +13,8 @@ namespace LoyalStamp.Data
 
         }
 
+        public DbSet<Merchant> Merchants { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             // Call the base method to ensure Identity configurations are applied
@@ -46,6 +48,20 @@ namespace LoyalStamp.Data
             builder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+            // Configure the Merchant entity
+            builder.Entity<Merchant>(entity =>
+            {
+                entity.ToTable("Merchants");
+
+                entity.HasIndex(m => m.UserId)
+                    .IsUnique();
+
+                entity.HasOne(m => m.User)
+                    .WithOne(u => u.MerchantProfile)
+                    .HasForeignKey<Merchant>(m => m.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

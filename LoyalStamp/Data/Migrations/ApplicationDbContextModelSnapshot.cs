@@ -16,7 +16,7 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261115045016_InitialIdentity";
+    public override string LastMigrationId => "20261117143632_AddMerchantsTable";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -30,6 +30,43 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
         modelBuilder.HasSequence("CustomerIdSeq");
 
         modelBuilder.HasSequence("MerchantIdSeq");
+
+        modelBuilder.Entity("LoyalStamp.Data.Entities.Merchant", b =>
+            {
+                var id = b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(id);
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Description")
+                    .HasMaxLength(500)
+                    .HasColumnType("nvarchar(500)");
+
+                b.Property<string>("LogoUrl")
+                    .HasMaxLength(300)
+                    .HasColumnType("nvarchar(300)");
+
+                b.Property<string>("StoreName")
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnType("nvarchar(100)");
+
+                b.Property<string>("UserId")
+                    .IsRequired()
+                    .HasMaxLength(12)
+                    .HasColumnType("nvarchar(12)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("UserId")
+                    .IsUnique();
+
+                b.ToTable("Merchants");
+            });
 
         modelBuilder.Entity("LoyalStamp.Data.Entities.User", b =>
             {
@@ -242,6 +279,17 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.ToTable("UserTokens");
             });
 
+        modelBuilder.Entity("LoyalStamp.Data.Entities.Merchant", b =>
+            {
+                b.HasOne("LoyalStamp.Data.Entities.User", "User")
+                    .WithOne("MerchantProfile")
+                    .HasForeignKey("LoyalStamp.Data.Entities.Merchant", "UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("User");
+            });
+
         modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
             {
                 b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -291,6 +339,11 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                     .HasForeignKey("UserId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
+            });
+
+        modelBuilder.Entity("LoyalStamp.Data.Entities.User", b =>
+            {
+                b.Navigation("MerchantProfile");
             });
 #pragma warning restore 612, 618
     }
