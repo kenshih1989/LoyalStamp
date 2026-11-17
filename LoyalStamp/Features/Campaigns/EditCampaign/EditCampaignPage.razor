@@ -1,0 +1,152 @@
+﻿@page "/merchant/campaigns/edit/{CampaignId:int}"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Merchant")]
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject EditCampaignHandler Handler
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Edit Campaign - LoyalStamp</PageTitle>
+
+<div class="container my-4" style="max-width: 600px;">
+    <div class="mb-3">
+        <a href="/merchant/campaigns" class="text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i> Back to My Campaigns
+        </a>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    }
+    else if (_request is null)
+    {
+        <div class="alert alert-warning">
+            Campaign not found or you do not have access to edit this campaign.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-1">Edit Stamp Campaign</h3>
+                <p class="text-muted small mb-4">Update your stamp rules, reward description, or active visibility.</p>
+
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="alert alert-danger">@_errorMessage</div>
+                }
+
+                <EditForm Model="_request" OnValidSubmit="HandleSubmitAsync" FormName="EditCampaignForm">
+                    <DataAnnotationsValidator />
+
+                    <div class="mb-3">
+                        <label class="form-label">Campaign Title <span class="text-danger">*</span></label>
+                        <InputText class="form-control" @bind-Value="_request.Title" />
+                        <ValidationMessage For="@(() => _request.Title)" class="text-danger small" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Min Spend per Stamp ($) <span class="text-danger">*</span></label>
+                            <InputNumber class="form-control" @bind-Value="_request.MinSpendAmount" step="0.50" />
+                            <ValidationMessage For="@(() => _request.MinSpendAmount)" class="text-danger small" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Target Stamps for Reward <span class="text-danger">*</span></label>
+                            <InputNumber class="form-control" @bind-Value="_request.TargetStamps" />
+                            <ValidationMessage For="@(() => _request.TargetStamps)" class="text-danger small" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Free Reward Item <span class="text-danger">*</span></label>
+                        <InputText class="form-control" @bind-Value="_request.RewardItem" />
+                        <ValidationMessage For="@(() => _request.RewardItem)" class="text-danger small" />
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <InputCheckbox class="form-check-input" @bind-Value="_request.IsActive" id="editIsActiveSwitch" />
+                        <label class="form-check-label" for="editIsActiveSwitch">
+                            Active (Visible to customers in Explore)
+                        </label>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-grow-1" disabled="@_isSubmitting">
+                            @if (_isSubmitting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                <span>Updating...</span>
+                            }
+                            else
+                            {
+                                <span>Save Changes</span>
+                            }
+                        </button>
+                        <a href="/merchant/campaigns" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    [Parameter]
+    public int CampaignId { get; set; }
+
+    private EditCampaignRequest? _request;
+    private string? _currentUserId;
+    private string? _errorMessage;
+    private bool _isLoading = true;
+    private bool _isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask is not null)
+        {
+            var authState = await AuthenticationStateTask;
+            _currentUserId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
+
+        if (!string.IsNullOrEmpty(_currentUserId))
+        {
+            _request = await Handler.GetByIdAsync(CampaignId, _currentUserId);
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task HandleSubmitAsync()
+    {
+        if (_request is null || string.IsNullOrEmpty(_currentUserId)) return;
+
+        _isSubmitting = true;
+        _errorMessage = null;
+
+        try
+        {
+            var (succeeded, error) = await Handler.HandleAsync(_request, _currentUserId);
+            if (succeeded)
+            {
+                Navigation.NavigateTo("/merchant/campaigns");
+            }
+            else
+            {
+                _errorMessage = error;
+            }
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}

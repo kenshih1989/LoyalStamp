@@ -16,7 +16,7 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261117143632_AddMerchantsTable";
+    public override string LastMigrationId => "20261117155613_AddStampCampaignsTable";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -66,6 +66,47 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                     .IsUnique();
 
                 b.ToTable("Merchants");
+            });
+
+        modelBuilder.Entity("LoyalStamp.Data.Entities.StampCampaign", b =>
+            {
+                var id = b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(id);
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime2");
+
+                b.Property<bool>("IsActive")
+                    .HasColumnType("bit");
+
+                b.Property<int>("MerchantId")
+                    .HasColumnType("int");
+
+                b.Property<decimal>("MinSpendAmount")
+                    .HasPrecision(18, 2)
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property<string>("RewardItem")
+                    .IsRequired()
+                    .HasMaxLength(150)
+                    .HasColumnType("nvarchar(150)");
+
+                b.Property<int>("TargetStamps")
+                    .HasColumnType("int");
+
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnType("nvarchar(100)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("MerchantId");
+
+                b.ToTable("StampCampaigns");
             });
 
         modelBuilder.Entity("LoyalStamp.Data.Entities.User", b =>
@@ -290,6 +331,17 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("User");
             });
 
+        modelBuilder.Entity("LoyalStamp.Data.Entities.StampCampaign", b =>
+            {
+                b.HasOne("LoyalStamp.Data.Entities.Merchant", "Merchant")
+                    .WithMany("Campaigns")
+                    .HasForeignKey("MerchantId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Merchant");
+            });
+
         modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
             {
                 b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -339,6 +391,11 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                     .HasForeignKey("UserId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
+            });
+
+        modelBuilder.Entity("LoyalStamp.Data.Entities.Merchant", b =>
+            {
+                b.Navigation("Campaigns");
             });
 
         modelBuilder.Entity("LoyalStamp.Data.Entities.User", b =>

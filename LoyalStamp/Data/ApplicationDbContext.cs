@@ -14,6 +14,7 @@ namespace LoyalStamp.Data
         }
 
         public DbSet<Merchant> Merchants { get; set; }
+        public DbSet<StampCampaign> StampCampaigns { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -60,6 +61,20 @@ namespace LoyalStamp.Data
                 entity.HasOne(m => m.User)
                     .WithOne(u => u.MerchantProfile)
                     .HasForeignKey<Merchant>(m => m.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure the StampCampaign entity
+            builder.Entity<StampCampaign>(entity =>
+            {
+                entity.ToTable("StampCampaigns");
+
+                entity.Property(c => c.MinSpendAmount)
+                    .HasPrecision(18, 2);
+
+                entity.HasOne(c => c.Merchant)
+                    .WithMany(m => m.Campaigns)
+                    .HasForeignKey(c => c.MerchantId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }

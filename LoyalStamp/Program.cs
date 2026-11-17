@@ -3,6 +3,9 @@ using LoyalStamp.Data;
 using LoyalStamp.Data.Entities;
 using LoyalStamp.Features.Auth.MerchantsRegistration;
 using LoyalStamp.Features.Auth.UserRegistration;
+using LoyalStamp.Features.Campaigns.CreateCampaign;
+using LoyalStamp.Features.Campaigns.EditCampaign;
+using LoyalStamp.Features.Campaigns.ListCampaigns;
 using LoyalStamp.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +39,9 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 builder.Services.AddScoped<UserIdGenerator>();
 builder.Services.AddScoped<RegisterUserHandler>();
 builder.Services.AddScoped<RegisterMerchantHandler>();
+builder.Services.AddScoped<ListCampaignsQuery>();
+builder.Services.AddScoped<CreateCampaignHandler>();
+builder.Services.AddScoped<EditCampaignHandler>();
 
 // Add authentication and authorization services
 builder.Services.AddCascadingAuthenticationState();

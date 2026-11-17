@@ -28,6 +28,6 @@ public class Merchant
     [ForeignKey(nameof(UserId))]
     public User User { get; set; } = null!;
 
-    // 后续添加 StampCampaign 实体后取消注释
-    // public ICollection<StampCampaign> Campaigns { get; set; } = new List<StampCampaign>();
+    // Navigation property to the StampCampaign entity
+    public ICollection<StampCampaign> Campaigns { get; set; } = new List<StampCampaign>();
 }
