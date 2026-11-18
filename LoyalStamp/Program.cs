@@ -9,6 +9,8 @@ using LoyalStamp.Features.Campaigns.ListCampaigns;
 using LoyalStamp.Features.CustomerWallet.ExploreCampaigns;
 using LoyalStamp.Features.CustomerWallet.MyCards;
 using LoyalStamp.Features.HistoryAndDashboard.MerchantDashboard;
+using LoyalStamp.Features.StampOperations.IssueStamp;
+using LoyalStamp.Features.StampOperations.RedeemReward;
 using LoyalStamp.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +50,10 @@ builder.Services.AddScoped<EditCampaignHandler>();
 builder.Services.AddScoped<DashboardMetricsQuery>();
 builder.Services.AddScoped<JoinCampaignCommand>();
 builder.Services.AddScoped<MyCardsQuery>();
+builder.Services.AddSignalR();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IssueStampCommand>();
+builder.Services.AddScoped<RedeemRewardCommand>();
 
 // Add authentication and authorization services
 builder.Services.AddCascadingAuthenticationState();
@@ -81,6 +87,8 @@ app.MapPost("/logout", async (SignInManager<User> signInManager) =>
     await signInManager.SignOutAsync();
     return Results.Redirect("/");
 });
+
+app.MapHub<StampNotificationHub>("/hubs/stamps");
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

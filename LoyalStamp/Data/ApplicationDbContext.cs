@@ -16,7 +16,7 @@ namespace LoyalStamp.Data
         public DbSet<Merchant> Merchants { get; set; }
         public DbSet<StampCampaign> StampCampaigns { get; set; }
         public DbSet<CustomerCard> CustomerCards { get; set; }
-
+        public DbSet<StampTransaction> StampTransactions { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             // Call the base method to ensure Identity configurations are applied
@@ -102,6 +102,20 @@ namespace LoyalStamp.Data
                     .WithMany(c => c.CustomerCards)
                     .HasForeignKey(cc => cc.CampaignId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // configure the StampTransaction entity
+            builder.Entity<StampTransaction>(entity =>
+            {
+                entity.ToTable("StampTransactions");
+
+                entity.Property(t => t.SpendAmount)
+                    .HasPrecision(18, 2);
+
+                entity.HasOne(t => t.CustomerCard)
+                    .WithMany(cc => cc.Transactions)
+                    .HasForeignKey(t => t.CustomerCardId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

@@ -57,6 +57,25 @@ public class DashboardMetricsQuery
             .OrderByDescending(c => c.CreatedAt)
             .ToList();
 
+        var campaignIds = campaigns.Select(c => c.Id).ToList();
+
+        int totalActiveCustomers = await db.CustomerCards
+            .AsNoTracking()
+            .Where(cc => campaignIds.Contains(cc.CampaignId))
+            .Select(cc => cc.UserId)
+            .Distinct()
+            .CountAsync();
+
+        int totalStampsIssued = await db.StampTransactions
+            .AsNoTracking()
+            .Where(t => campaignIds.Contains(t.CustomerCard.CampaignId) && t.TransactionType == "Earn")
+            .SumAsync(t => (int?)t.StampsChanged) ?? 0;
+
+        int totalRewardsRedeemed = await db.CustomerCards
+            .AsNoTracking()
+            .Where(cc => campaignIds.Contains(cc.CampaignId))
+            .SumAsync(cc => (int?)cc.TotalRedeemedCount) ?? 0;
+
         return new MerchantDashboardDto
         {
             StoreName = merchant.StoreName,
@@ -66,9 +85,9 @@ public class DashboardMetricsQuery
             ActiveCampaigns = campaigns.Count(c => c.IsActive),
 
             // default placeholder values: to be replaced with real Count/Sum queries after adding CustomerCards and StampTransactions tables
-            TotalActiveCustomers = 0,
-            TotalStampsIssued = 0,
-            TotalRewardsRedeemed = 0,
+            TotalActiveCustomers = totalActiveCustomers,
+            TotalStampsIssued = totalStampsIssued,
+            TotalRewardsRedeemed = totalRewardsRedeemed,
 
             RecentCampaigns = campaigns
                 .Take(5)

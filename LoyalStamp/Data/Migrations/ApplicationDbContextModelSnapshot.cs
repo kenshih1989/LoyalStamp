@@ -16,7 +16,7 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261118085526_AddCustomerCardsTable";
+    public override string LastMigrationId => "20261118091426_AddStampTransactionsTable";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -154,6 +154,43 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("MerchantId");
 
                 b.ToTable("StampCampaigns");
+            });
+
+        modelBuilder.Entity("LoyalStamp.Data.Entities.StampTransaction", b =>
+            {
+                var id = b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(id);
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("CustomerCardId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<string>("Notes")
+                    .HasMaxLength(200)
+                    .HasColumnType("nvarchar(200)");
+
+                b.Property<decimal?>("SpendAmount")
+                    .HasPrecision(18, 2)
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property<int>("StampsChanged")
+                    .HasColumnType("int");
+
+                b.Property<string>("TransactionType")
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasColumnType("nvarchar(20)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("CustomerCardId");
+
+                b.ToTable("StampTransactions");
             });
 
         modelBuilder.Entity("LoyalStamp.Data.Entities.User", b =>
@@ -408,6 +445,17 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("Merchant");
             });
 
+        modelBuilder.Entity("LoyalStamp.Data.Entities.StampTransaction", b =>
+            {
+                b.HasOne("LoyalStamp.Data.Entities.CustomerCard", "CustomerCard")
+                    .WithMany("Transactions")
+                    .HasForeignKey("CustomerCardId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("CustomerCard");
+            });
+
         modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
             {
                 b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -457,6 +505,11 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                     .HasForeignKey("UserId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
+            });
+
+        modelBuilder.Entity("LoyalStamp.Data.Entities.CustomerCard", b =>
+            {
+                b.Navigation("Transactions");
             });
 
         modelBuilder.Entity("LoyalStamp.Data.Entities.Merchant", b =>

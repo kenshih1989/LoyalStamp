@@ -1,11 +1,16 @@
 ﻿@page "/my-wallet"
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Customer")]
+@implements IAsyncDisposable
+@using System.Net
 @using System.Security.Claims
 @using LoyalStamp.Features.CustomerWallet.MyCards
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.SignalR.Client
 @inject MyCardsQuery Query
+@inject NavigationManager Navigation
+@inject IHttpContextAccessor HttpContextAccessor
 
 <PageTitle>My Stamp Cards - LoyalStamp</PageTitle>
 
@@ -19,6 +24,15 @@
             <i class="bi bi-compass me-1"></i> Explore More
         </a>
     </div>
+
+    @if (!string.IsNullOrEmpty(_liveToastMessage))
+    {
+        <div class="alert alert-info alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-lightning-charge-fill text-warning me-2"></i>
+            <strong>Live Update:</strong> @_liveToastMessage
+            <button type="button" class="btn-close" @onclick="() => _liveToastMessage = null"></button>
+        </div>
+    }
 
     @if (_isLoading)
     {
@@ -83,7 +97,7 @@
                                 <i class="bi bi-gift text-success me-1"></i> @card.RewardItem
                             </p>
 
-                            <!-- 可视化印章网格 -->
+                            <!-- Visual stamp grid -->
                             <div class="d-flex flex-wrap gap-2 mb-3">
                                 @for (int i = 1; i <= totalSlots; i++)
                                 {
@@ -127,21 +141,70 @@
 
     private List<CustomerCardDto> _cards = new();
     private CustomerCardDto? _selectedCard;
+    private string? _userId;
+    private string? _liveToastMessage;
     private bool _isLoading = true;
+    private HubConnection? _hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
         if (AuthenticationStateTask is not null)
         {
             var authState = await AuthenticationStateTask;
-            var userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (!string.IsNullOrEmpty(userId))
+            if (!string.IsNullOrEmpty(_userId))
             {
-                _cards = await Query.ExecuteAsync(userId);
+                _cards = await Query.ExecuteAsync(_userId);
+                await InitializeSignalRAsync();
             }
         }
 
         _isLoading = false;
+    }
+
+    private async Task InitializeSignalRAsync()
+    {
+        // Forward authentication cookies so the SignalR Hub can identify the logged-in customer
+        var cookieHeader = HttpContextAccessor.HttpContext?.Request.Headers.Cookie.ToString();
+        var hubUrl = Navigation.ToAbsoluteUri("/hubs/stamps");
+
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(hubUrl, options =>
+            {
+                if (!string.IsNullOrEmpty(cookieHeader))
+                {
+                    options.Cookies = new CookieContainer();
+                    options.Headers.Add("Cookie", cookieHeader);
+                }
+            })
+            .WithAutomaticReconnect()
+            .Build();
+
+        _hubConnection.On<Guid, string>("ReceiveStampUpdate", async (updatedCardId, message) =>
+        {
+            if (string.IsNullOrEmpty(_userId)) return;
+
+            _cards = await Query.ExecuteAsync(_userId);
+            _liveToastMessage = message;
+
+            // Keep the open QR modal synchronized if the customer is currently displaying that card
+            if (_selectedCard is not null && _selectedCard.CardId == updatedCardId)
+            {
+                _selectedCard = _cards.FirstOrDefault(c => c.CardId == updatedCardId);
+            }
+
+            await InvokeAsync(StateHasChanged);
+        });
+
+        await _hubConnection.StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
     }
 }

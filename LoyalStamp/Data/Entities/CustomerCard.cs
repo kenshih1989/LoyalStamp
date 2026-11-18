@@ -35,6 +35,5 @@ public class CustomerCard
     [ForeignKey(nameof(CampaignId))]
     public StampCampaign Campaign { get; set; } = null!;
 
-    // navigation properties: uncomment after added the StampTransaction entity
-    // public ICollection<StampTransaction> Transactions { get; set; } = new List<StampTransaction>();
+    public ICollection<StampTransaction> Transactions { get; set; } = new List<StampTransaction>();
 }
