@@ -83,7 +83,7 @@ app.UseAuthorization();
 
 app.UseAntiforgery();
 
-// 退出登录端点（支持表单 POST 退出）
+// Logout endpoint (supports form POST logout)
 app.MapPost("/logout", async (SignInManager<User> signInManager) =>
 {
     await signInManager.SignOutAsync();
