@@ -4,9 +4,5 @@
     <File Path="docs/02_Architecture_And_Schema.md" />
     <File Path="docs/03_YouTube_Video_Plan.md" />
   </Folder>
-  <Folder Name="/docs/YouTube_Episodes/">
-    <File Path="docs/Youtube_Episodes/episode_1_project_introduction_system_roles_net_11_setup.md" />
-    <File Path="docs/Youtube_Episodes/episode_2_database_foundation_12_digit_user_ids_customer_auth.md" />
-  </Folder>
   <Project Path="LoyalStamp/LoyalStamp.csproj" />
 </Solution>
