@@ -1,4 +1,103 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">LoyalStamp</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <!-- Everyone can see: Home -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <!-- Unauthenticated users: Registration and Login -->
+        <AuthorizeView>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/login">
+                        <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> Login
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/register-as-user">
+                        <span class="bi bi-person-plus" aria-hidden="true"></span> Customer Sign Up
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/register-as-merchant">
+                        <span class="bi bi-shop" aria-hidden="true"></span> Merchant Sign Up
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+
+        <!-- Merchant-specific navigation menu -->
+        <AuthorizeView Roles="Merchant">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/merchant/dashboard">
+                        <span class="bi bi-speedometer2" aria-hidden="true"></span> Dashboard
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/merchant/campaigns">
+                        <span class="bi bi-card-checklist" aria-hidden="true"></span> My Campaigns
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/merchant/issue-stamp">
+                        <span class="bi bi-qr-code-scan" aria-hidden="true"></span> Issue / Redeem
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        <!-- Customer-specific navigation menu -->
+        <AuthorizeView Roles="Customer">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/explore">
+                        <span class="bi bi-compass" aria-hidden="true"></span> Explore Campaigns
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/my-wallet">
+                        <span class="bi bi-wallet2" aria-hidden="true"></span> My Stamp Cards
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/history">
+                        <span class="bi bi-clock-history" aria-hidden="true"></span> History
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        <!-- Common navigation for authenticated users -->
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3 mt-3 border-top border-secondary pt-2">
+                    <form action="/logout" method="post">
+                        <AntiforgeryToken />
+                        <button type="submit" class="nav-link btn btn-link text-start w-100">
+                            <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Logout
+                        </button>
+                    </form>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </nav>
+</div>
+
+@* @using Microsoft.AspNetCore.Components.Authorization
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">LoyalStamp</a>
@@ -42,3 +141,4 @@
 
 
 
+ *@

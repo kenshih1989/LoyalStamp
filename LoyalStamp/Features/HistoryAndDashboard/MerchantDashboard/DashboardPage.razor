@@ -1,0 +1,217 @@
+﻿@page "/merchant/dashboard"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Merchant")]
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject DashboardMetricsQuery Query
+
+<PageTitle>Merchant Dashboard - LoyalStamp</PageTitle>
+
+<div class="container my-4">
+    @if (_isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-muted mt-2">Loading merchant dashboard...</p>
+        </div>
+    }
+    else if (_dashboard is null)
+    {
+        <div class="alert alert-warning">
+            Store profile not found. Please contact support or complete your merchant profile setup.
+        </div>
+    }
+    else
+    {
+        <!-- Store Header -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    @if (!string.IsNullOrWhiteSpace(_dashboard.LogoUrl))
+                    {
+                        <img src="@_dashboard.LogoUrl" alt="@_dashboard.StoreName Logo"
+                             class="rounded-circle border" style="width: 64px; height: 64px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold fs-4"
+                             style="width: 64px; height: 64px;">
+                            @_dashboard.StoreName.Substring(0, 1).ToUpper()
+                        </div>
+                    }
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary mb-1">Merchant Portal</span>
+                        <h2 class="mb-1 fw-bold">@_dashboard.StoreName</h2>
+                        @if (!string.IsNullOrWhiteSpace(_dashboard.Description))
+                        {
+                            <p class="text-muted small mb-0">@_dashboard.Description</p>
+                        }
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="/merchant/campaigns/create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i> New Campaign
+                    </a>
+                    <a href="/merchant/campaigns" class="btn btn-outline-secondary">
+                        <i class="bi bi-card-checklist me-1"></i> Manage Campaigns
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Core Operational KPI Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-lg-3">
+                <div class="card shadow-sm h-100 border-start border-primary border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-semibold text-uppercase">Active Campaigns</span>
+                            <i class="bi bi-megaphone text-primary fs-5"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">@_dashboard.ActiveCampaigns <span class="fs-6 text-muted fw-normal">/ @_dashboard.TotalCampaigns</span></h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card shadow-sm h-100 border-start border-info border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-semibold text-uppercase">Active Customers</span>
+                            <i class="bi bi-people text-info fs-5"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">@_dashboard.TotalActiveCustomers</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card shadow-sm h-100 border-start border-warning border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-semibold text-uppercase">Stamps Issued</span>
+                            <i class="bi bi-patch-check text-warning fs-5"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">@_dashboard.TotalStampsIssued</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card shadow-sm h-100 border-start border-success border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-semibold text-uppercase">Rewards Redeemed</span>
+                            <i class="bi bi-gift text-success fs-5"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">@_dashboard.TotalRewardsRedeemed</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Quick Actions and Recent Activity Overview -->
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-transparent fw-bold">
+                        <i class="bi bi-lightning-charge text-warning me-1"></i> Quick Actions
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="/merchant/campaigns/create" class="list-group-item list-group-item-action py-3">
+                            <div class="fw-semibold">Create Stamp Campaign</div>
+                            <small class="text-muted">Set minimum spend, target stamps, and reward item</small>
+                        </a>
+                        <a href="/merchant/campaigns" class="list-group-item list-group-item-action py-3">
+                            <div class="fw-semibold">View & Toggle Campaigns</div>
+                            <small class="text-muted">Edit rules or pause active loyalty cards</small>
+                        </a>
+                        <a href="/merchant/issue-stamp" class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">Issue Stamps / Redeem</div>
+                                <small class="text-muted">Scan customer QR code at checkout</small>
+                            </div>
+                            <span class="badge bg-secondary">Next</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                        <span class="fw-bold"><i class="bi bi-clock-history text-primary me-1"></i> Recent Campaigns</span>
+                        <a href="/merchant/campaigns" class="small text-decoration-none">View All</a>
+                    </div>
+                    @if (!_dashboard.RecentCampaigns.Any())
+                    {
+                        <div class="card-body text-center py-5">
+                            <p class="text-muted mb-3">You haven't launched any stamp campaigns yet.</p>
+                            <a href="/merchant/campaigns/create" class="btn btn-sm btn-primary">Create First Campaign</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Campaign</th>
+                                        <th>Rule</th>
+                                        <th>Reward</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in _dashboard.RecentCampaigns)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@item.Title</td>
+                                            <td class="small">$@item.MinSpendAmount.ToString("F2") × @item.TargetStamps</td>
+                                            <td class="small">@item.RewardItem</td>
+                                            <td>
+                                                <span class="badge @(item.IsActive ? "bg-success" : "bg-secondary")">
+                                                    @(item.IsActive ? "Active" : "Inactive")
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="/merchant/campaigns/edit/@item.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private MerchantDashboardDto? _dashboard;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask is not null)
+        {
+            var authState = await AuthenticationStateTask;
+            var userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                _dashboard = await Query.ExecuteAsync(userId);
+            }
+        }
+
+        _isLoading = false;
+    }
+}
