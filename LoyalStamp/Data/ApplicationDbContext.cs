@@ -15,6 +15,7 @@ namespace LoyalStamp.Data
 
         public DbSet<Merchant> Merchants { get; set; }
         public DbSet<StampCampaign> StampCampaigns { get; set; }
+        public DbSet<CustomerCard> CustomerCards { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -76,6 +77,31 @@ namespace LoyalStamp.Data
                     .WithMany(m => m.Campaigns)
                     .HasForeignKey(c => c.MerchantId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            //configure the CustomerCard entity
+            builder.Entity<CustomerCard>(entity =>
+            {
+                entity.ToTable("CustomerCards");
+
+                // prevent duplicate entries: each customer can only have one card per campaign
+                entity.HasIndex(cc => new { cc.UserId, cc.CampaignId })
+                    .IsUnique();
+
+                // unique index for the checkout code
+                entity.HasIndex(cc => cc.CardCode)
+                    .IsUnique();
+
+                entity.HasOne(cc => cc.User)
+                    .WithMany(u => u.CustomerCards)
+                    .HasForeignKey(cc => cc.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // use Restrict to avoid SQL Server multiple cascade delete paths conflict
+                entity.HasOne(cc => cc.Campaign)
+                    .WithMany(c => c.CustomerCards)
+                    .HasForeignKey(cc => cc.CampaignId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

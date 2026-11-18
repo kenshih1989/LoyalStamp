@@ -1,0 +1,187 @@
+﻿@page "/explore"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Customer")]
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject JoinCampaignCommand CampaignService
+@inject NavigationManager Navigation
+
+<PageTitle>Explore Campaigns - LoyalStamp</PageTitle>
+
+<div class="container my-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Explore Stamp Campaigns</h2>
+            <p class="text-muted mb-0">Discover local merchants and add loyalty cards to your digital wallet.</p>
+        </div>
+        <a href="/my-wallet" class="btn btn-outline-primary">
+            <i class="bi bi-wallet2 me-1"></i> Go to My Wallet
+        </a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_alertMessage))
+    {
+        <div class="alert @(_isError ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
+            @_alertMessage
+            @if (!_isError)
+            {
+                <a href="/my-wallet" class="alert-link ms-2">View in Wallet &rarr;</a>
+            }
+            <button type="button" class="btn-close" @onclick="() => _alertMessage = null"></button>
+        </div>
+    }
+
+    @if (_isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-muted mt-2">Loading active campaigns...</p>
+        </div>
+    }
+    else if (!_campaigns.Any())
+    {
+        <div class="card shadow-sm text-center py-5">
+            <div class="card-body">
+                <i class="bi bi-compass display-4 text-muted mb-3"></i>
+                <h5>No Active Campaigns Right Now</h5>
+                <p class="text-muted mb-0">Check back soon as local merchants launch new stamp rewards!</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var item in _campaigns)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <!-- 店铺信息头部 -->
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                @if (!string.IsNullOrWhiteSpace(item.LogoUrl))
+                                {
+                                    <img src="@item.LogoUrl" alt="@item.StoreName"
+                                         class="rounded-circle border" style="width: 48px; height: 48px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
+                                         style="width: 48px; height: 48px;">
+                                        @item.StoreName.Substring(0, 1).ToUpper()
+                                    </div>
+                                }
+                                <div>
+                                    <div class="fw-bold">@item.StoreName</div>
+                                    <span class="badge bg-primary-subtle text-primary">@item.Title</span>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(item.StoreDescription))
+                            {
+                                <p class="text-muted small mb-3">@item.StoreDescription</p>
+                            }
+
+                            <!-- 集点规则 -->
+                            <div class="bg-light rounded p-3 mb-3 mt-auto small">
+                                <div class="mb-1">
+                                    <i class="bi bi-cash-coin text-primary me-2"></i>
+                                    Spend <strong>$@item.MinSpendAmount.ToString("F2")</strong> = 1 Stamp
+                                </div>
+                                <div class="mb-1">
+                                    <i class="bi bi-grid-3x3-gap text-primary me-2"></i>
+                                    Goal: <strong>@item.TargetStamps Stamps</strong>
+                                </div>
+                                <div>
+                                    <i class="bi bi-gift text-success me-2"></i>
+                                    Reward: <strong>@item.RewardItem</strong>
+                                </div>
+                            </div>
+
+                            <!-- 领取按钮 -->
+                            @if (item.IsAlreadyJoined)
+                            {
+                                <button class="btn btn-outline-success w-100" disabled>
+                                    <i class="bi bi-check-circle-fill me-1"></i> Already in Wallet
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-primary w-100"
+                                        disabled="@(_joiningCampaignId == item.CampaignId)"
+                                        @onclick="() => HandleJoinAsync(item.CampaignId)">
+                                    @if (_joiningCampaignId == item.CampaignId)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                        <span>Joining...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-plus-circle me-1"></i>
+                                        <span>Join Campaign</span>
+                                    }
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private List<ExploreCampaignDto> _campaigns = new();
+    private string? _userId;
+    private bool _isLoading = true;
+    private int? _joiningCampaignId;
+    private string? _alertMessage;
+    private bool _isError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask is not null)
+        {
+            var authState = await AuthenticationStateTask;
+            _userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
+
+        if (!string.IsNullOrEmpty(_userId))
+        {
+            _campaigns = await CampaignService.GetActiveCampaignsAsync(_userId);
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task HandleJoinAsync(int campaignId)
+    {
+        if (string.IsNullOrEmpty(_userId)) return;
+
+        _joiningCampaignId = campaignId;
+        _alertMessage = null;
+
+        try
+        {
+            var (succeeded, error) = await CampaignService.JoinAsync(campaignId, _userId);
+            if (succeeded)
+            {
+                _isError = false;
+                _alertMessage = "Stamp card added to your wallet!";
+                _campaigns = await CampaignService.GetActiveCampaignsAsync(_userId);
+            }
+            else
+            {
+                _isError = true;
+                _alertMessage = error;
+            }
+        }
+        finally
+        {
+            _joiningCampaignId = null;
+        }
+    }
+}

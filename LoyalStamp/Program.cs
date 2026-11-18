@@ -6,6 +6,8 @@ using LoyalStamp.Features.Auth.UserRegistration;
 using LoyalStamp.Features.Campaigns.CreateCampaign;
 using LoyalStamp.Features.Campaigns.EditCampaign;
 using LoyalStamp.Features.Campaigns.ListCampaigns;
+using LoyalStamp.Features.CustomerWallet.ExploreCampaigns;
+using LoyalStamp.Features.CustomerWallet.MyCards;
 using LoyalStamp.Features.HistoryAndDashboard.MerchantDashboard;
 using LoyalStamp.Shared;
 using Microsoft.AspNetCore.Identity;
@@ -44,6 +46,8 @@ builder.Services.AddScoped<ListCampaignsQuery>();
 builder.Services.AddScoped<CreateCampaignHandler>();
 builder.Services.AddScoped<EditCampaignHandler>();
 builder.Services.AddScoped<DashboardMetricsQuery>();
+builder.Services.AddScoped<JoinCampaignCommand>();
+builder.Services.AddScoped<MyCardsQuery>();
 
 // Add authentication and authorization services
 builder.Services.AddCascadingAuthenticationState();

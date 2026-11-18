@@ -1,0 +1,68 @@
+﻿@using LoyalStamp.Shared
+
+@if (Card is not null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.55);" @onclick="Close">
+        <div class="modal-dialog modal-dialog-centered" @onclick:stopPropagation="true">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0">@Card.StoreName</h5>
+                        <small class="text-muted">@Card.CampaignTitle</small>
+                    </div>
+                    <button type="button" class="btn-close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <p class="small text-muted mb-3">
+                        Show this QR code or fallback code at checkout to earn stamps or redeem your reward.
+                    </p>
+
+                    <div class="p-3 bg-white border rounded d-inline-block mb-3 shadow-sm">
+                        <img src="@_qrImageBase64" alt="Checkout QR Code" style="width: 220px; height: 220px;" />
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="text-muted small d-block">Fallback Card Code</span>
+                        <span class="badge bg-dark fs-5 font-monospace px-3 py-2 mt-1">@Card.CardCode</span>
+                    </div>
+
+                    <div class="alert @(Card.CurrentStamps >= Card.TargetStamps ? "alert-success" : "alert-light border") mb-0 small">
+                        <strong>Current Progress:</strong> @Card.CurrentStamps / @Card.TargetStamps stamps
+                        @if (Card.CurrentStamps >= Card.TargetStamps)
+                        {
+                            <div class="fw-bold mt-1">
+                                <i class="bi bi-gift-fill me-1"></i> Ready to redeem: @Card.RewardItem!
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary w-100" @onclick="Close">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public CustomerCardDto? Card { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private string _qrImageBase64 = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        if (Card is not null)
+        {
+            _qrImageBase64 = QrCodeHelper.GenerateBase64QrCode(Card.CardId.ToString());
+        }
+    }
+
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+}

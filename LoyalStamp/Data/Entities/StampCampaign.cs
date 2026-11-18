@@ -30,10 +30,9 @@ public class StampCampaign
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-    // Navigation property to the Merchant entity
+    // Navigation property
     [ForeignKey(nameof(MerchantId))]
     public Merchant Merchant { get; set; } = null!;
 
-    // 后续添加 CustomerCard 实体后取消注释
-    // public ICollection<CustomerCard> CustomerCards { get; set; } = new List<CustomerCard>();
+    public ICollection<CustomerCard> CustomerCards { get; set; } = new List<CustomerCard>();
 }

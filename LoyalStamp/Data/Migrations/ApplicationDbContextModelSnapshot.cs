@@ -16,7 +16,7 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261117155613_AddStampCampaignsTable";
+    public override string LastMigrationId => "20261118085526_AddCustomerCardsTable";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -30,6 +30,53 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
         modelBuilder.HasSequence("CustomerIdSeq");
 
         modelBuilder.HasSequence("MerchantIdSeq");
+
+        modelBuilder.Entity("LoyalStamp.Data.Entities.CustomerCard", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<int>("CampaignId")
+                    .HasColumnType("int");
+
+                b.Property<string>("CardCode")
+                    .IsRequired()
+                    .HasMaxLength(12)
+                    .HasColumnType("nvarchar(12)");
+
+                b.Property<int>("CurrentStamps")
+                    .HasColumnType("int");
+
+                b.Property<DateTime>("LastUpdated")
+                    .HasColumnType("datetime2");
+
+                b.Property<byte[]>("RowVersion")
+                    .IsConcurrencyToken()
+                    .IsRequired()
+                    .ValueGeneratedOnAddOrUpdate()
+                    .HasColumnType("rowversion");
+
+                b.Property<int>("TotalRedeemedCount")
+                    .HasColumnType("int");
+
+                b.Property<string>("UserId")
+                    .IsRequired()
+                    .HasMaxLength(12)
+                    .HasColumnType("nvarchar(12)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("CampaignId");
+
+                b.HasIndex("CardCode")
+                    .IsUnique();
+
+                b.HasIndex("UserId", "CampaignId")
+                    .IsUnique();
+
+                b.ToTable("CustomerCards");
+            });
 
         modelBuilder.Entity("LoyalStamp.Data.Entities.Merchant", b =>
             {
@@ -320,6 +367,25 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.ToTable("UserTokens");
             });
 
+        modelBuilder.Entity("LoyalStamp.Data.Entities.CustomerCard", b =>
+            {
+                b.HasOne("LoyalStamp.Data.Entities.StampCampaign", "Campaign")
+                    .WithMany("CustomerCards")
+                    .HasForeignKey("CampaignId")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
+
+                b.HasOne("LoyalStamp.Data.Entities.User", "User")
+                    .WithMany("CustomerCards")
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Campaign");
+
+                b.Navigation("User");
+            });
+
         modelBuilder.Entity("LoyalStamp.Data.Entities.Merchant", b =>
             {
                 b.HasOne("LoyalStamp.Data.Entities.User", "User")
@@ -398,8 +464,15 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("Campaigns");
             });
 
+        modelBuilder.Entity("LoyalStamp.Data.Entities.StampCampaign", b =>
+            {
+                b.Navigation("CustomerCards");
+            });
+
         modelBuilder.Entity("LoyalStamp.Data.Entities.User", b =>
             {
+                b.Navigation("CustomerCards");
+
                 b.Navigation("MerchantProfile");
             });
 #pragma warning restore 612, 618
