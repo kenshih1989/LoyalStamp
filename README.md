@@ -88,7 +88,7 @@ LoyalStamp/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/<your-username>/LoyalStamp.git
+   git clone https://github.com/kenshih1989/LoyalStamp.git
    cd LoyalStamp
    ```
 
