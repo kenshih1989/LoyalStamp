@@ -8,6 +8,7 @@ using LoyalStamp.Features.Campaigns.EditCampaign;
 using LoyalStamp.Features.Campaigns.ListCampaigns;
 using LoyalStamp.Features.CustomerWallet.ExploreCampaigns;
 using LoyalStamp.Features.CustomerWallet.MyCards;
+using LoyalStamp.Features.HistoryAndDashboard.CustomerHistory;
 using LoyalStamp.Features.HistoryAndDashboard.MerchantDashboard;
 using LoyalStamp.Features.StampOperations.IssueStamp;
 using LoyalStamp.Features.StampOperations.RedeemReward;
@@ -54,6 +55,7 @@ builder.Services.AddSignalR();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IssueStampCommand>();
 builder.Services.AddScoped<RedeemRewardCommand>();
+builder.Services.AddScoped<HistoryQuery>();
 
 // Add authentication and authorization services
 builder.Services.AddCascadingAuthenticationState();

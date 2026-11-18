@@ -1,0 +1,259 @@
+﻿@page "/history"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Customer")]
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject HistoryQuery Query
+
+<PageTitle>Transaction History - LoyalStamp</PageTitle>
+
+<div class="container my-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Transaction History</h2>
+            <p class="text-muted mb-0">Chronological log of all stamps earned and rewards redeemed across your cards.</p>
+        </div>
+        <a href="/my-wallet" class="btn btn-outline-primary">
+            <i class="bi bi-wallet2 me-1"></i> Back to My Wallet
+        </a>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-muted mt-2">Loading your transaction history...</p>
+        </div>
+    }
+    else if (!_allTransactions.Any())
+    {
+        <div class="card shadow-sm text-center py-5">
+            <div class="card-body">
+                <i class="bi bi-clock-history display-4 text-muted mb-3"></i>
+                <h5>No Transactions Yet</h5>
+                <p class="text-muted mb-3">
+                    Once you visit a participating merchant and scan your card code, your stamp activity will appear here.
+                </p>
+                <a href="/explore" class="btn btn-primary">Explore Campaigns</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Summary Metrics Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 border-start border-primary border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted small fw-semibold text-uppercase">Total Stamps Earned</span>
+                            <i class="bi bi-patch-check-fill text-primary fs-5"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">+@_totalStampsEarned</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 border-start border-success border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted small fw-semibold text-uppercase">Rewards Redeemed</span>
+                            <i class="bi bi-gift-fill text-success fs-5"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">@_totalRewardsRedeemed</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 border-start border-info border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted small fw-semibold text-uppercase">Tracked Spend</span>
+                            <i class="bi bi-receipt text-info fs-5"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">$@_totalAmountSpent.ToString("F2")</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body py-3">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-6">
+                        <div class="btn-group" role="group" aria-label="Filter by transaction type">
+                            <button type="button"
+                                    class="btn btn-sm @(_selectedType == "All" ? "btn-primary" : "btn-outline-primary")"
+                                    @onclick='() => _selectedType = "All"'>
+                                All (@_allTransactions.Count)
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm @(_selectedType == "Earn" ? "btn-primary" : "btn-outline-primary")"
+                                    @onclick='() => _selectedType = "Earn"'>
+                                Stamps Earned (@_allTransactions.Count(t => t.TransactionType == "Earn"))
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm @(_selectedType == "Redeem" ? "btn-success" : "btn-outline-success")"
+                                    @onclick='() => _selectedType = "Redeem"'>
+                                Rewards Redeemed (@_allTransactions.Count(t => t.TransactionType == "Redeem"))
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 d-flex justify-content-md-end align-items-center gap-2">
+                        <label class="small text-muted text-nowrap mb-0">Filter by Store:</label>
+                        <select class="form-select form-select-sm" style="max-width: 240px;" @bind="_selectedStore">
+                            <option value="">All Stores</option>
+                            @foreach (var store in _availableStores)
+                            {
+                                <option value="@store">@store</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chronological Transaction Table -->
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Store & Campaign</th>
+                            <th>Type</th>
+                            <th>Details / Notes</th>
+                            <th class="text-end">Stamps</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!FilteredTransactions.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    No transactions match the selected filter criteria.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in FilteredTransactions)
+                            {
+                                bool isEarn = item.TransactionType == "Earn";
+
+                                <tr>
+                                    <td class="text-nowrap">
+                                        <div class="fw-semibold">@item.CreatedAt.ToString("MMM dd, yyyy")</div>
+                                        <small class="text-muted">@item.CreatedAt.ToString("hh:mm tt")</small>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if (!string.IsNullOrWhiteSpace(item.StoreLogoUrl))
+                                            {
+                                                <img src="@item.StoreLogoUrl" alt="@item.StoreName"
+                                                     class="rounded-circle border" style="width: 32px; height: 32px; object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold small"
+                                                     style="width: 32px; height: 32px;">
+                                                    @item.StoreName.Substring(0, 1).ToUpper()
+                                                </div>
+                                            }
+                                            <div>
+                                                <div class="fw-bold">@item.StoreName</div>
+                                                <div class="small text-muted">
+                                                    @item.CampaignTitle
+                                                    <span class="badge bg-light text-dark border font-monospace ms-1">@item.CardCode</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (isEarn)
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary">
+                                                <i class="bi bi-plus-circle me-1"></i> Earned
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success-subtle text-success">
+                                                <i class="bi bi-gift me-1"></i> Redeemed
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="small">
+                                        @if (isEarn && item.SpendAmount.HasValue)
+                                        {
+                                            <span class="fw-semibold text-dark">Spend: $@item.SpendAmount.Value.ToString("F2")</span>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(item.Notes))
+                                        {
+                                            <div class="text-muted">@item.Notes</div>
+                                        }
+                                        else if (!isEarn)
+                                        {
+                                            <span class="text-muted">Reward claimed</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="fw-bold fs-6 @(isEarn ? "text-primary" : "text-success")">
+                                            @(item.StampsChanged > 0 ? $"+{item.StampsChanged}" : item.StampsChanged.ToString())
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private List<TransactionHistoryItemDto> _allTransactions = new();
+    private List<string> _availableStores = new();
+    private int _totalStampsEarned;
+    private int _totalRewardsRedeemed;
+    private decimal _totalAmountSpent;
+
+    private string _selectedType = "All";
+    private string _selectedStore = string.Empty;
+    private bool _isLoading = true;
+
+    private IEnumerable<TransactionHistoryItemDto> FilteredTransactions =>
+        _allTransactions.Where(t =>
+            (_selectedType == "All" || t.TransactionType == _selectedType) &&
+            (string.IsNullOrEmpty(_selectedStore) || t.StoreName == _selectedStore));
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask is not null)
+        {
+            var authState = await AuthenticationStateTask;
+            var userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var result = await Query.ExecuteAsync(userId);
+                _allTransactions = result.Transactions;
+                _availableStores = result.AvailableStores;
+                _totalStampsEarned = result.TotalStampsEarned;
+                _totalRewardsRedeemed = result.TotalRewardsRedeemed;
+                _totalAmountSpent = result.TotalAmountSpent;
+            }
+        }
+
+        _isLoading = false;
+    }
+}
