@@ -8,5 +8,6 @@
     <File Path="docs/Youtube_Episodes/episode_1_project_introduction_system_roles_net_11_setup.md" />
     <File Path="docs/Youtube_Episodes/episode_2_database_foundation_12_digit_user_ids_customer_auth.md" />
   </Folder>
+  <Project Path="LoyalStamp.Tests/LoyalStamp.Tests.csproj" Id="64292e78-8281-4a17-b409-a0ec1a9bf93c" />
   <Project Path="LoyalStamp/LoyalStamp.csproj" />
 </Solution>

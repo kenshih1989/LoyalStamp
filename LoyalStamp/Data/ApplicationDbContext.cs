@@ -22,15 +22,29 @@ namespace LoyalStamp.Data
             // Call the base method to ensure Identity configurations are applied
             base.OnModelCreating(builder);
 
-            // Define a sequences for CustomerId
-            builder.HasSequence<long>("CustomerIdSeq")
-                .StartsAt(1)
-                .IncrementsBy(1);
+            // SQLite in-memory testing does not support sequences; only configure them for SQL Server
+            if (Database.ProviderName != "Microsoft.EntityFrameworkCore.Sqlite")
+            {
+                // Define a sequences for CustomerId
+                builder.HasSequence<long>("CustomerIdSeq")
+                    .StartsAt(1)
+                    .IncrementsBy(1);
 
-            // Define a sequence for MerchantId
-            builder.HasSequence<long>("MerchantIdSeq")
-                .StartsAt(1)
-                .IncrementsBy(1);
+                // Define a sequence for MerchantId
+                builder.HasSequence<long>("MerchantIdSeq")
+                    .StartsAt(1)
+                    .IncrementsBy(1);
+
+            }
+
+            // SQLite does not auto-generate SQL Server rowversion timestamps during in-memory tests
+            if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+            {
+                builder.Entity<CustomerCard>()
+                    .Property(cc => cc.RowVersion)
+                    .ValueGeneratedNever();
+            }
+
 
             // Control the length of the User Id to be 12 characters
             builder.Entity<User>()
