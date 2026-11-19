@@ -4,38 +4,56 @@
 
 ---
 
+## 🎥 Video Overview & System Demo
+
+Watch the full walkthrough of **LoyalStamp**, covering the system architecture, database design, and a live side-by-side demonstration of real-time stamp issuing and reward redemption:
+
+[![LoyalStamp System Overview & Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://youtu.be/XWF9aJ6ZYT4)
+
+> ▶️ **[Watch on YouTube: LoyalStamp v1.0 — Full-Stack Blazor & SignalR System Demo](https://youtu.be/XWF9aJ6ZYT4)**
+
+### ⏱️ What's Covered in the Video:
+- **System Introduction & Problem Statement:** Replacing traditional paper loyalty cards with a real-time digital solution.
+- **Architecture & Tech Stack:** How Vertical Slice Architecture (`Features/`), EF Core, and SignalR work together in .NET 11.
+- **Live End-to-End Demo:**
+  - Merchant onboarding & creating customizable loyalty stamp campaigns.
+  - Customer registration, discovering campaigns, and generating checkout QR codes (`QRCoder`).
+  - Real-time stamp issuing and reward redemption across split browser sessions without page refreshes.
+
+---
+
 ## ✨ Key Features (v1.0)
 
 ### 🔐 Authentication & Role Management (`Features/Auth`)
-* **Dual-Role Registration & Login:** Powered by ASP.NET Core Identity with custom 12-digit sequential user IDs (`10000000000X` for Customers, `20000000000X` for Merchants).
-* **Merchant Onboarding:** Atomic registration flow that provisions both the merchant user account and their 1-to-1 store profile (`StoreName`, `Description`, `LogoUrl`) with rollback protection.
-* **Role-Based Navigation:** Dynamic sidebar (`NavMenu.razor`) and route authorization isolating Merchant and Customer workflows.
+- **Dual-Role Registration & Login:** Powered by ASP.NET Core Identity with custom 12-digit sequential user IDs (`10000000000X` for Customers, `20000000000X` for Merchants).
+- **Merchant Onboarding:** Atomic registration flow that provisions both the merchant user account and their 1-to-1 store profile (`StoreName`, `Description`, `LogoUrl`) with rollback protection.
+- **Role-Based Navigation:** Dynamic sidebar (`NavMenu.razor`) and route authorization isolating Merchant and Customer workflows.
 
 ### 🏪 Merchant Portal (`Features/Campaigns`, `Features/HistoryAndDashboard`, `Features/StampOperations`)
-* **Merchant Dashboard (`/merchant/dashboard`):** Displays store profile details and real-time operational KPIs (Active Campaigns, Active Customers, Total Stamps Issued, and Total Rewards Redeemed).
-* **Campaign Management (`/merchant/campaigns`):** Create, edit, and toggle active/inactive status for stamp campaigns with configurable minimum spend per stamp, target stamp count, and reward items.
-* **Checkout Terminal (`/merchant/issue-stamp`):**
-  * Look up customer cards via scanned **QR Code (GUID)** or fallback short alphanumeric **Card Code** (e.g., `LS-8A92B`).
-  * Automatic stamp calculation (`Floor(SpendAmount / MinSpendAmount)`) with stamp overflow/carryover support.
-  * Reward redemption validation with optimistic concurrency control (`RowVersion`) to prevent double-redemption.
-  * Strict merchant ownership guards to prevent cross-store tampering.
+- **Merchant Dashboard (`/merchant/dashboard`):** Displays store profile details and real-time operational KPIs (Active Campaigns, Active Customers, Total Stamps Issued, and Total Rewards Redeemed).
+- **Campaign Management (`/merchant/campaigns`):** Create, edit, and toggle active/inactive status for stamp campaigns with configurable minimum spend per stamp, target stamp count, and reward items.
+- **Checkout Terminal (`/merchant/issue-stamp`):**
+  - Look up customer cards via scanned **QR Code (GUID)** or fallback short alphanumeric **Card Code** (e.g., `LS-8A92B`).
+  - Automatic stamp calculation (`Floor(SpendAmount / MinSpendAmount)`) with stamp overflow/carryover support.
+  - Reward redemption validation with optimistic concurrency control (`RowVersion`) to prevent double-redemption.
+  - Strict merchant ownership guards to prevent cross-store tampering.
 
 ### 🎟️ Customer Wallet & Discovery (`Features/CustomerWallet`, `Features/HistoryAndDashboard`)
-* **Explore Campaigns (`/explore`):** Browse active loyalty campaigns across participating merchants and add digital stamp cards to the wallet (enforced by composite unique constraints to prevent duplicate joins).
-* **Digital Stamp Wallet (`/my-wallet`):** Interactive visual stamp grids showing progress and overflow stamps, paired with a checkout QR code modal (`CardQrModal.razor`) generated via **QRCoder**.
-* **Real-Time UI Sync (`StampNotificationHub`):** Powered by **SignalR** so customers see stamp additions, reward redemptions, and toast notifications instantaneously without refreshing their browser.
-* **Transaction History (`/history`):** Filterable ledger of all earned stamps and redeemed rewards across stores, complete with lifetime spend and redemption summaries.
+- **Explore Campaigns (`/explore`):** Browse active loyalty campaigns across participating merchants and add digital stamp cards to the wallet (enforced by composite unique constraints to prevent duplicate joins).
+- **Digital Stamp Wallet (`/my-wallet`):** Interactive visual stamp grids showing progress and overflow stamps, paired with a checkout QR code modal (`CardQrModal.razor`) generated via **QRCoder**.
+- **Real-Time UI Sync (`StampNotificationHub`):** Powered by **SignalR** so customers see stamp additions, reward redemptions, and toast notifications instantaneously without refreshing their browser.
+- **Transaction History (`/history`):** Filterable ledger of all earned stamps and redeemed rewards across stores, complete with lifetime spend and redemption summaries.
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **Framework:** .NET 11 / ASP.NET Core Blazor Web App (Interactive Server Render Mode)
-* **Database:** Microsoft SQL Server + Entity Framework Core (Code-First)
-* **Authentication:** ASP.NET Core Identity (Cookie Authentication + Role-Based Authorization)
-* **Real-Time Communication:** ASP.NET Core SignalR (`/hubs/stamps`)
-* **QR Code Generation:** `QRCoder` (Base64 PNG rendering)
-* **UI & Styling:** Bootstrap 5 & Bootstrap Icons
+- **Framework:** .NET 11 / ASP.NET Core Blazor Web App (Interactive Server Render Mode)
+- **Database:** Microsoft SQL Server + Entity Framework Core (Code-First)
+- **Authentication:** ASP.NET Core Identity (Cookie Authentication + Role-Based Authorization)
+- **Real-Time Communication:** ASP.NET Core SignalR (`/hubs/stamps`)
+- **QR Code Generation:** `QRCoder` (Base64 PNG rendering)
+- **UI & Styling:** Bootstrap 5 & Bootstrap Icons
 
 ---
 
@@ -80,9 +98,9 @@ LoyalStamp/
 ## 🚀 Getting Started
 
 ### Prerequisites
-* [.NET 11 SDK](https://dotnet.microsoft.com/) (or compatible .NET SDK configured in your project)
-* [Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server) (LocalDB, Express, or Developer Edition)
-* Visual Studio 2026 (or VS Code / Rider)
+- [.NET 11 SDK](https://dotnet.microsoft.com/) (or compatible .NET SDK configured in your project)
+- [Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server) (LocalDB, Express, or Developer Edition)
+- Visual Studio 2026 (or VS Code / Rider)
 
 ### Installation & Local Setup
 
