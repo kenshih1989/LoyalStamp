@@ -68,7 +68,7 @@ public class JoinCampaignCommand
             return (false, "This campaign is no longer available.");
         }
 
-        // 应用层防重复检查
+        // Check if the user has already joined this campaign
         bool alreadyExists = await db.CustomerCards
             .AnyAsync(cc => cc.UserId == userId && cc.CampaignId == campaignId);
 
@@ -77,7 +77,7 @@ public class JoinCampaignCommand
             return (false, "You already have this stamp card in your wallet.");
         }
 
-        // 生成唯一的短码 (例如: LS-8A92B)
+        // generate a unique short code for the card (e.g., LS-8A92B)
         string cardCode;
         do
         {
@@ -103,14 +103,14 @@ public class JoinCampaignCommand
         }
         catch (DbUpdateException)
         {
-            // 数据库复合唯一索引兜底防并发重复提交
+            // If a duplicate entry is detected, it means the user has already joined the campaign
             return (false, "You have already joined this campaign.");
         }
     }
 
     private static string GenerateShortCardCode()
     {
-        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 排除易混淆的 0/O/1/I
+        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // exclude confusing characters 0/O/1/I
         Span<char> buffer = stackalloc char[5];
         for (int i = 0; i < buffer.Length; i++)
         {
