@@ -2,7 +2,7 @@
 using LoyalStamp.Features.CustomerWallet.MyCards;
 using LoyalStamp.Tests.TestHelpers;
 
-namespace LoyalStamp.Tests.Features.CustomerWallet;
+namespace LoyalStamp.Tests.Unit.Features.CustomerWallet;
 
 public class MyCardsTests
 {

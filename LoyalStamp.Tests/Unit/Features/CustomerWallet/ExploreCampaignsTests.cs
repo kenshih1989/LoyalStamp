@@ -3,7 +3,7 @@ using LoyalStamp.Features.CustomerWallet.ExploreCampaigns;
 using LoyalStamp.Tests.TestHelpers;
 using Microsoft.EntityFrameworkCore;
 
-namespace LoyalStamp.Tests.Features.CustomerWallet;
+namespace LoyalStamp.Tests.Unit.Features.CustomerWallet;
 
 public class ExploreCampaignsTests
 {

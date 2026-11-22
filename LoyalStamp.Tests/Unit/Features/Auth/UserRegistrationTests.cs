@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
 
-namespace LoyalStamp.Tests.Features.Auth;
+namespace LoyalStamp.Tests.Unit.Features.Auth;
 
 public class UserRegistrationTests
 {

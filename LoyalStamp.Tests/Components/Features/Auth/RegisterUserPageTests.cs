@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
 
-namespace LoyalStamp.Tests.Features.Auth;
+namespace LoyalStamp.Tests.Components.Features.Auth;
 
 public class RegisterUserPageTests : BunitContext
 {

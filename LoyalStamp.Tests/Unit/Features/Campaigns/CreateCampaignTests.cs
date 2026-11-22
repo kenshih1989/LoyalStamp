@@ -3,7 +3,7 @@ using LoyalStamp.Features.Campaigns.CreateCampaign;
 using LoyalStamp.Tests.TestHelpers;
 using Microsoft.EntityFrameworkCore;
 
-namespace LoyalStamp.Tests.Features.Campaigns;
+namespace LoyalStamp.Tests.Unit.Features.Campaigns;
 
 public class CreateCampaignTests
 {

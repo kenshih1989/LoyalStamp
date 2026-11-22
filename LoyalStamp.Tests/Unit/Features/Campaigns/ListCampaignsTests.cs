@@ -2,7 +2,7 @@
 using LoyalStamp.Features.Campaigns.ListCampaigns;
 using LoyalStamp.Tests.TestHelpers;
 
-namespace LoyalStamp.Tests.Features.Campaigns;
+namespace LoyalStamp.Tests.Unit.Features.Campaigns;
 
 public class ListCampaignsTests
 {

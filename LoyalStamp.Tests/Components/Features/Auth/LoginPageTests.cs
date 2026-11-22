@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using System.Security.Claims;
 
-namespace LoyalStamp.Tests.Features.Auth;
+namespace LoyalStamp.Tests.Components.Features.Auth;
 
 public class LoginPageTests : BunitContext
 {

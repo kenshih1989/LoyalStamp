@@ -2,7 +2,7 @@
 using LoyalStamp.Features.HistoryAndDashboard.CustomerHistory;
 using LoyalStamp.Tests.TestHelpers;
 
-namespace LoyalStamp.Tests.Features.HistoryAndDashboard;
+namespace LoyalStamp.Tests.Unit.Features.HistoryAndDashboard;
 
 public class CustomerHistoryTests
 {

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
-namespace LoyalStamp.Tests.Features.StampOperations;
+namespace LoyalStamp.Tests.Unit.Features.StampOperations;
 
 public class RedeemRewardCommandTests
 {

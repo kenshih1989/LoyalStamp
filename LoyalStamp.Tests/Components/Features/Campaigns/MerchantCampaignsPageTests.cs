@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
 
-namespace LoyalStamp.Tests.Features.Campaigns;
+namespace LoyalStamp.Tests.Components.Features.Campaigns;
 
 public class MerchantCampaignsPageTests : BunitContext
 {

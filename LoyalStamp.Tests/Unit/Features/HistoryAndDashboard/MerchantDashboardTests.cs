@@ -2,7 +2,7 @@
 using LoyalStamp.Features.HistoryAndDashboard.MerchantDashboard;
 using LoyalStamp.Tests.TestHelpers;
 
-namespace LoyalStamp.Tests.Features.HistoryAndDashboard;
+namespace LoyalStamp.Tests.Unit.Features.HistoryAndDashboard;
 
 public class MerchantDashboardTests
 {
