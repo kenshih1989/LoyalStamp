@@ -1,6 +1,6 @@
 ﻿using LoyalStamp.Data;
 using LoyalStamp.Data.Entities;
-using LoyalStamp.Features.Auth.MerchantsRegistration;
+using LoyalStamp.Features.Auth.MerchantRegistration;
 using LoyalStamp.Shared;
 using LoyalStamp.Tests.TestHelpers;
 using Microsoft.AspNetCore.Identity;

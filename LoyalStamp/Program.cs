@@ -1,7 +1,7 @@
 using LoyalStamp.Components;
 using LoyalStamp.Data;
 using LoyalStamp.Data.Entities;
-using LoyalStamp.Features.Auth.MerchantsRegistration;
+using LoyalStamp.Features.Auth.MerchantRegistration;
 using LoyalStamp.Features.Auth.UserRegistration;
 using LoyalStamp.Features.Campaigns.CreateCampaign;
 using LoyalStamp.Features.Campaigns.EditCampaign;

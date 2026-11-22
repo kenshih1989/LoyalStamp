@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace LoyalStamp.Features.Auth.MerchantsRegistration;
+namespace LoyalStamp.Features.Auth.MerchantRegistration;
 
 public class RegisterMerchantRequest
 {
