@@ -4,13 +4,11 @@
 
 ---
 
-## 🎥 Video Overview & System Demo
+## 🎥 Video Walkthrough (Episode 1)
 
-Watch the full walkthrough of **LoyalStamp**, covering the system architecture, database design, and a live side-by-side demonstration of real-time stamp issuing and reward redemption:
+[![Stop Paper Stamp Fraud! Real-Time Digital Loyalty App with .NET 11, Blazor & SignalR](https://img.youtube.com/vi/9FHGRUnxwPg/maxresdefault.jpg)](https://youtu.be/9FHGRUnxwPg)
 
-[![LoyalStamp System Overview & Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://youtu.be/XWF9aJ6ZYT4)
-
-> ▶️ **[Watch on YouTube: LoyalStamp v1.0 — Full-Stack Blazor & SignalR System Demo](https://youtu.be/XWF9aJ6ZYT4)**
+> **Watch Episode 1:** [Stop Paper Stamp Fraud! Real-Time Digital Loyalty App with .NET 11, Blazor & SignalR](https://youtu.be/9FHGRUnxwPg)
 
 ### ⏱️ What's Covered in the Video:
 - **System Introduction & Problem Statement:** Replacing traditional paper loyalty cards with a real-time digital solution.
