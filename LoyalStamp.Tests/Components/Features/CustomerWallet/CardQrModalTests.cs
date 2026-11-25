@@ -81,12 +81,17 @@ public class CardQrModalTests : BunitContext
             .Add(p => p.Card, card)
             .Add(p => p.OnClose, () => closeCount++));
 
-        // 2. Act 1: clicking inside .modal-content stops propagation -> OnClose must NOT fire
-        await cut.Find(".modal-content").ClickAsync();
+        // 2. Act 1: verify .modal-dialog stops click propagation so backdrop OnClose will NOT fire
+        var dialog = cut.Find(".modal-dialog");
+        Assert.NotNull(dialog.GetAttribute("blazor:onclick:stoppropagation"));
         Assert.Equal(0, closeCount);
 
-        // 3. Act 2: clicking the header close button (or backdrop) -> OnClose fires
-        await cut.Find(".btn-close").ClickAsync();
+        // 3. Act 2: clicking the backdrop (.modal) -> OnClose fires
+        await cut.Find(".modal").ClickAsync();
         Assert.Equal(1, closeCount);
+
+        // 3. Act 3: clicking the header close button (or backdrop) -> OnClose fires
+        await cut.Find(".btn-close").ClickAsync();
+        Assert.Equal(2, closeCount);
     }
 }
